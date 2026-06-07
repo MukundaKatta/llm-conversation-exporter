@@ -56,9 +56,7 @@ def test_markdown_list_content_tool_result_block():
     msgs = [
         {
             "role": "user",
-            "content": [
-                {"type": "tool_result", "content": "42", "is_error": False}
-            ],
+            "content": [{"type": "tool_result", "content": "42", "is_error": False}],
         }
     ]
     md = export_markdown(msgs)
@@ -70,9 +68,7 @@ def test_markdown_tool_result_error():
     msgs = [
         {
             "role": "user",
-            "content": [
-                {"type": "tool_result", "content": "oops", "is_error": True}
-            ],
+            "content": [{"type": "tool_result", "content": "oops", "is_error": True}],
         }
     ]
     md = export_markdown(msgs)
@@ -80,9 +76,7 @@ def test_markdown_tool_result_error():
 
 
 def test_markdown_image_block():
-    msgs = [
-        {"role": "user", "content": [{"type": "image", "source": {"url": "..."}}]}
-    ]
+    msgs = [{"role": "user", "content": [{"type": "image", "source": {"url": "..."}}]}]
     md = export_markdown(msgs)
     assert "[image]" in md
 
@@ -98,6 +92,51 @@ def test_markdown_unknown_block_no_text():
     md = export_markdown(msgs)
     # Should not crash; content section may be empty
     assert "User" in md
+
+
+def test_markdown_tool_result_nested_list_content():
+    # Anthropic tool_result blocks may carry a list of content blocks.
+    msgs = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "content": [{"type": "text", "text": "nested ok"}],
+                }
+            ],
+        }
+    ]
+    md = export_markdown(msgs)
+    assert "[tool_result]" in md
+    assert "nested ok" in md
+
+
+def test_markdown_document_block():
+    msgs = [{"role": "user", "content": [{"type": "document", "source": {}}]}]
+    md = export_markdown(msgs)
+    assert "[document]" in md
+
+
+def test_markdown_multiple_blocks_joined():
+    msgs = [
+        {
+            "role": "assistant",
+            "content": [
+                {"type": "text", "text": "first"},
+                {"type": "text", "text": "second"},
+            ],
+        }
+    ]
+    md = export_markdown(msgs)
+    assert "first" in md
+    assert "second" in md
+
+
+def test_markdown_non_dict_block_skipped():
+    msgs = [{"role": "user", "content": ["raw string", {"type": "text", "text": "ok"}]}]
+    md = export_markdown(msgs)
+    assert "ok" in md
 
 
 # ---------------------------------------------------------------------------
