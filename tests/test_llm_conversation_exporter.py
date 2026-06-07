@@ -139,6 +139,28 @@ def test_markdown_non_dict_block_skipped():
     assert "ok" in md
 
 
+def test_markdown_none_content_renders_empty():
+    # OpenAI assistant messages with only tool_calls carry content=None.
+    msgs = [{"role": "assistant", "content": None}]
+    md = export_markdown(msgs)
+    assert "**Assistant**" in md
+    assert "None" not in md
+
+
+def test_text_none_content_renders_empty():
+    msgs = [{"role": "assistant", "content": None}]
+    txt = export_text(msgs)
+    assert "Assistant:" in txt
+    assert "None" not in txt
+
+
+def test_html_none_content_renders_empty():
+    msgs = [{"role": "assistant", "content": None}]
+    h = export_html(msgs)
+    assert 'class="message assistant"' in h
+    assert ">None<" not in h
+
+
 # ---------------------------------------------------------------------------
 # export_markdown
 # ---------------------------------------------------------------------------

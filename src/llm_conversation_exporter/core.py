@@ -51,6 +51,10 @@ class ExportFormat(str, Enum):
 
 def _content_as_text(content: Any) -> str:
     """Extract plain text from content (string or list of blocks)."""
+    if content is None:
+        # OpenAI assistant messages carrying only tool_calls have
+        # ``content: null``; render that as empty rather than "None".
+        return ""
     if isinstance(content, str):
         return content
     if isinstance(content, list):
